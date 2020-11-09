@@ -1,6 +1,7 @@
 use json::JsonValue;
 use std::fs::File;
 use std::io::prelude::*;
+use std::collections::HashSet;
 
 // fn main() -> std::io::Result<()> {
 //     let mut file = File::open("foo.txt")?;
@@ -10,7 +11,7 @@ use std::io::prelude::*;
 //     Ok(())
 // }
 
-pub fn media_trope_str(media_name: String, media_type: String) -> Result<String, std::io::Error> {
+fn media_trope_str(media_name: &str, media_type: &str) -> Result<String, std::io::Error> {
     // Result::Ok(json::parse("{}").unwrap())
     // Q: why not use ? operator here?
     //
@@ -25,35 +26,52 @@ pub fn media_trope_str(media_name: String, media_type: String) -> Result<String,
     //
     // I don't understand that condition, exactly, but I do understand its upside: no ? for me,
     // except if I split the method into two, which is what I've done.
-    let mut fp = String::from(&media_type);
-    fp.push_str("_");
-    fp.push_str(&media_name);
-    fp.push_str(".json");
+    let fp = format!("{}_{}.json", media_type, media_name);
     let mut file = File::open(fp)?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
     Ok(String::from(contents))
 }
 
-pub fn media_trope_str_to_json(media_trope_str: String) -> Result<JsonValue, json::Error> {
+fn media_trope_str_to_json(media_trope_str: &str) -> Result<JsonValue, json::Error> {
     let media_trope_json = json::parse(&media_trope_str)?;
     Ok(media_trope_json)
 }
 
-pub fn media_trope_json_to_vec(media_trope_json: JsonValue) -> Vec<String> {
-    for (key, value) in media_trope_json.entries() {
-        println!("{:?}, {:?}", key, value)
+fn media_trope_json_to_vec(media_trope_json: JsonValue) -> HashSet<String> {
+    let mut keys = HashSet::<String>::new();
+    for (key, _) in media_trope_json.entries() {
+        keys.insert(String::from(key));
+        // values.push(value.as_u32().unwrap());
     }
-    vec![]
+    keys
 }
-pub fn get_tropes(media_name: String, media_type: String) -> Vec<String> {
-    let tropes = match media_trope_str(media_name, media_type) {
+
+pub fn get_tropes(media_name: &str, media_type: &str) -> HashSet<String> {
+    let tropes_str = match media_trope_str(&media_name, &media_type) {
         Ok(result) => result,
-        Err(_) => panic!("Could not find file media file!"),
+        Err(_) => panic!(format!("Could not find file {}_{}.json!", media_type, media_name)),
     };
-    let tropes = match media_trope_str_to_json(tropes) {
+    let tropes_json = match media_trope_str_to_json(&tropes_str) {
         Ok(result) => result,
-        Err(_) => panic!("Could not find file media file!"),
+        Err(_) => panic!(format!("File {}_{}.json is not valid JSON.", media_type, media_name)),
     };
-    media_trope_json_to_vec(tropes)
+    let tropes = media_trope_json_to_vec(tropes_json);
+    tropes
+}
+
+fn n_overlapping(m1: &HashSet<String>, m2: &HashSet<String>) -> u32 {
+    let mut n: u32 = 0;
+    for trope in m1 {
+        if m2.contains(trope) {
+            n += 1;
+        }
+    }
+    n
+}
+
+pub fn similarity_score(m1_name: &str, m1_type: &str, m2_name: &str, m2_type: &str) -> u32 {
+    let m1_tropes = &get_tropes(m1_name, m1_type);
+    let m2_tropes = &get_tropes(m2_name, m2_type);
+    n_overlapping(m1_tropes, m2_tropes)
 }
