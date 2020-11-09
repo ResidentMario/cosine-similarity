@@ -1,3 +1,5 @@
+use cosine_similarity::get_tropes;
+
 fn main() {
-    println!("Hello, world!");
+    get_tropes(String::from("BurnNotice"), String::from("Series"));
 }
