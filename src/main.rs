@@ -1,5 +1,6 @@
 // use cosine_similarity::get_tropes;
 use cosine_similarity::similarity_score;
+use cosine_similarity::overlapping_tropes;
 use std::env;
 
 fn main() {
@@ -25,5 +26,10 @@ fn main() {
     let m2_name = m2_tup[1];
     let m2_type = m2_tup[0];
 
-    println!("{}", similarity_score(m1_name, m1_type, m2_name, m2_type));
+    println!("Similarity score: {}", similarity_score(m1_name, m1_type, m2_name, m2_type));
+
+    println!(
+        "These works both feature the following tropes: {:?}",
+        overlapping_tropes(m1_name, m1_type, m2_name, m2_type
+    ));
 }

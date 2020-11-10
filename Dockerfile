@@ -17,6 +17,3 @@ RUN conda install -c conda-forge beautifulsoup4 jupyterlab
 # Install Rust
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 ENV PATH=/root/.cargo/bin:$PATH
-
-# Load code
-RUN git clone https://github.com/ResidentMario/cosine-similarity.git

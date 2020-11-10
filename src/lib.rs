@@ -52,6 +52,18 @@ pub fn get_tropes(media_name: &str, media_type: &str) -> HashSet<String> {
     tropes
 }
 
+pub fn overlapping_tropes(m1_name: &str, m1_type: &str, m2_name: &str, m2_type: &str) -> Vec<String> {
+    let m1 = get_tropes(m1_name, m1_type);
+    let m2 = get_tropes(m2_name, m2_type);
+    let mut result: Vec<String> = Vec::new();
+    for trope in m1 {
+        if m2.contains(&trope) {
+            result.push(String::from(trope))
+        }
+    }
+    result
+}
+
 fn n_overlapping(m1: &HashSet<String>, m2: &HashSet<String>) -> u32 {
     let mut n: u32 = 0;
     for trope in m1 {
