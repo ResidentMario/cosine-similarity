@@ -3,14 +3,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::collections::HashSet;
 
-// fn main() -> std::io::Result<()> {
-//     let mut file = File::open("foo.txt")?;
-//     let mut contents = String::new();
-//     file.read_to_string(&mut contents)?;
-//     assert_eq!(contents, "Hello, world!");
-//     Ok(())
-// }
-
 fn media_trope_str(media_name: &str, media_type: &str) -> Result<String, std::io::Error> {
     // Result::Ok(json::parse("{}").unwrap())
     // Q: why not use ? operator here?
@@ -70,8 +62,14 @@ fn n_overlapping(m1: &HashSet<String>, m2: &HashSet<String>) -> u32 {
     n
 }
 
-pub fn similarity_score(m1_name: &str, m1_type: &str, m2_name: &str, m2_type: &str) -> u32 {
+pub fn similarity_score(m1_name: &str, m1_type: &str, m2_name: &str, m2_type: &str) -> f64 {
+    // cf. formula at https://en.wikipedia.org/wiki/Cosine_similarity#Definition
+    // This is radically simplified by the fact that trope scores are always binary {0, 1} values.
     let m1_tropes = &get_tropes(m1_name, m1_type);
     let m2_tropes = &get_tropes(m2_name, m2_type);
-    n_overlapping(m1_tropes, m2_tropes)
+
+    let numerator = n_overlapping(m1_tropes, m2_tropes);
+    let m1_magnitude = (m1_tropes.len() as f64).sqrt();
+    let m2_magnitude = (m2_tropes.len() as f64).sqrt();
+    (numerator as f64) / (m1_magnitude * m2_magnitude)
 }

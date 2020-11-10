@@ -1,5 +1,6 @@
-use cosine_similarity::get_tropes;
+// use cosine_similarity::get_tropes;
+use cosine_similarity::similarity_score;
 
 fn main() {
-    get_tropes(String::from("BurnNotice"), String::from("Series"));
+    println!("{}", similarity_score("BurnNotice", "Series", "Naruto", "Series"));
 }
